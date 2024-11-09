@@ -2,6 +2,7 @@ const express = require(`express`);
 const joi = require('joi');
 const fs = require('fs');
 const path = require('path');
+// const { v4: uuidv4 } = require('uuid') // Подключаем библиотеку uuid
 
 const userScheme = joi.object({
     firstName: joi.string().min(1).required(),
@@ -38,20 +39,13 @@ app.get('/users/:id', (req, res) => {
 
 app.post('/users', (req, res) => {
     const users = JSON.parse(fs.readFileSync(pathToListUsers, 'utf-8'));
-    if (users.hasOwnProperty("id")) {
-        let uniqueID = users.id;
-        uniqueID += 1;
-        users.push({
-            id: uniqueID,
-            ...req.body
-        })
-    } else {
-        uniqueID += 1;
-        users.push({
-            id: uniqueID,
-            ...req.body
-        })
-    }
+    // const uniqueID = uuidv4() // Генерация нового уникального id с использованием uuid
+    let uniqueID = users.length > 0 ? Math.max(...users.map(u => u.id)) : 0;
+    uniqueID += 1;
+    users.push({
+        id: uniqueID,
+        ...req.body
+    })
     fs.writeFileSync(pathToListUsers, JSON.stringify(users, null, 2));
     res.send({ id: uniqueID })
 });
